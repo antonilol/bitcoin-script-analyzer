@@ -1,0 +1,4 @@
+#!/bin/bash
+
+firefox localhost:7878/index.html &
+http-server pkg

@@ -1,0 +1,20 @@
+[package]
+name = "bitcoin-script-analyzer"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Bitcoin script analyzer"
+homepage = "https://github.com/antonilol/bitcoin-script-analyzer"
+repository = "https://github.com/antonilol/bitcoin-script-analyzer"
+keywords = ["bitcoin"]
+categories = ["cryptography::cryptocurrencies"]
+
+[features]
+threads = []
+
+[dependencies]
+bitcoin_hashes = { version = "0.12.0", default-features = false }
+time = { version = "0.3.22", features = ["formatting"] }
+
+[profile.release]
+lto = true
