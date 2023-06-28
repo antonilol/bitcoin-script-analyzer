@@ -1,0 +1,3 @@
+- look at how `Expr`s are used and "tag" them accordingly
+- save information about possible lengths/values of non-`BytesExpr`s
+- spending conditions -> spending instructions
