@@ -4,7 +4,7 @@ use crate::{
     expr::{Expr, MultisigArgs, OpExprArgs, Opcode1, Opcode2, Opcode3},
     opcode::opcodes,
     script::{
-        convert::{decode_bool, decode_int, encode_int, FALSE, TRUE},
+        convert::{decode_bool, decode_int, encode_bool_expr, encode_int_expr},
         stack::Stack,
         ScriptElem, ScriptSlice,
     },
@@ -341,7 +341,7 @@ impl<'a> ScriptAnalyzer<'a> {
                                         // (!a && f(a)) -> f(false)
 
                                         let mut res = expr2.clone();
-                                        if res.replace_all(&args[0], &Expr::bytes(FALSE)) {
+                                        if res.replace_all(&args[0], &encode_bool_expr(false)) {
                                             exprs[k] = res;
                                             continue 'i;
                                         }
@@ -362,7 +362,7 @@ impl<'a> ScriptAnalyzer<'a> {
                             // (a && f(a)) -> f(true)
 
                             let mut res = expr2.clone();
-                            if res.replace_all(expr1, &Expr::bytes(TRUE)) {
+                            if res.replace_all(expr1, &encode_bool_expr(true)) {
                                 exprs[k] = res;
                                 continue 'i;
                             }
@@ -470,15 +470,14 @@ impl<'a> ScriptAnalyzer<'a> {
                                 };
                                 self.spending_conditions
                                     .push(Opcode2::OP_EQUAL.expr_with_error(
-                                        Box::new([elem.clone(), Expr::bytes(TRUE)]),
+                                        Box::new([elem.clone(), encode_bool_expr(true)]),
                                         error,
                                     ));
-                                fork.spending_conditions.push(
-                                    Opcode2::OP_EQUAL.expr_with_error(
-                                        Box::new([elem, Expr::bytes(FALSE)]),
+                                fork.spending_conditions
+                                    .push(Opcode2::OP_EQUAL.expr_with_error(
+                                        Box::new([elem, encode_bool_expr(false)]),
                                         error,
-                                    ),
-                                );
+                                    ));
                             } else {
                                 self.spending_conditions.push(elem.clone());
                                 fork.spending_conditions
@@ -586,8 +585,7 @@ impl<'a> ScriptAnalyzer<'a> {
                     }
 
                     opcodes::OP_DEPTH => {
-                        self.stack
-                            .push(Expr::bytes_owned(encode_int(self.stack.len() as i64)));
+                        self.stack.push(encode_int_expr(self.stack.len() as i64));
                     }
 
                     opcodes::OP_DROP => {
@@ -636,7 +634,7 @@ impl<'a> ScriptAnalyzer<'a> {
 
                     opcodes::OP_SIZE => {
                         let size = match self.stack.get_back(0) {
-                            Expr::Bytes(b) => Expr::bytes_owned(encode_int(b.len() as i64)),
+                            Expr::Bytes(b) => encode_int_expr(b.len() as i64),
                             elem => Opcode1::OP_SIZE.expr(Box::new([elem.clone()])),
                         };
 
@@ -796,7 +794,7 @@ impl<'a> ScriptAnalyzer<'a> {
                         if ctx.rules == ScriptRules::All {
                             self.spending_conditions
                                 .push(Opcode2::OP_EQUAL.expr_with_error(
-                                    Box::new([dummy, Expr::bytes(FALSE)]),
+                                    Box::new([dummy, Expr::bytes_owned(Box::new([]))]),
                                     ScriptError::SCRIPT_ERR_SIG_NULLDUMMY,
                                 ));
                         }

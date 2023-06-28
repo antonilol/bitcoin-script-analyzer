@@ -29,6 +29,12 @@ pub struct ConditionStack {
     m_first_false_pos: u32,
 }
 
+impl Default for ConditionStack {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ConditionStack {
     /// A constant for m_first_false_pos to indicate there are no falses.
     const NO_FALSE: u32 = u32::MAX;

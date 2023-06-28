@@ -19,7 +19,9 @@ pub enum PubKeyCheckResult {
     Valid { compressed: bool },
 }
 
-pub fn check_pub_key(pub_key: &[u8]) -> PubKeyCheckResult {
+pub fn check_pub_key<T: AsRef<[u8]>>(pub_key: T) -> PubKeyCheckResult {
+    let pub_key = pub_key.as_ref();
+
     if pub_key.len() == 33 && (pub_key[0] == 0x02 || pub_key[0] == 0x03) {
         PubKeyCheckResult::Valid { compressed: true }
     } else if pub_key.len() == 65 && pub_key[0] == 0x04 {
@@ -46,7 +48,7 @@ pub fn check_pub_key(pub_key: &[u8]) -> PubKeyCheckResult {
 /// See https://bitcointalk.org/index.php?topic=8392.msg127623#msg127623
 ///
 /// This function is consensus-critical since BIP66.
-pub fn is_valid_signature_encoding(sig: &[u8]) -> bool {
+pub fn is_valid_signature_encoding<T: AsRef<[u8]>>(sig: T) -> bool {
     // Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S] [sighash]
     // * total-length: 1-byte length descriptor of everything that follows,
     //   excluding the sighash byte.
@@ -58,6 +60,8 @@ pub fn is_valid_signature_encoding(sig: &[u8]) -> bool {
     // * S: arbitrary-length big-endian encoded S value. The same rules apply.
     // * sighash: 1-byte value indicating what data is hashed (not part of the DER
     //   signature)
+
+    let sig = sig.as_ref();
 
     // Minimum and maximum size constraints.
     if sig.len() < 9 {

@@ -1,8 +1,12 @@
-use crate::script_error::ScriptError;
+use crate::{expr::Expr, script_error::ScriptError};
 
 const INT_MAX_LEN: usize = 5;
 
-pub fn encode_int(n: i64) -> Box<[u8]> {
+pub fn encode_int_expr(n: i64) -> Expr {
+    Expr::bytes_owned(encode_int_box(n))
+}
+
+pub fn encode_int_box(n: i64) -> Box<[u8]> {
     if n == 0 {
         return Box::new([]);
     }
@@ -28,7 +32,9 @@ pub fn encode_int(n: i64) -> Box<[u8]> {
     bytes[0..len].to_vec().into_boxed_slice()
 }
 
-pub fn check_int(bytes: &[u8], max_len: usize) -> Result<(), ScriptError> {
+pub fn check_int<T: AsRef<[u8]>>(bytes: T, max_len: usize) -> Result<(), ScriptError> {
+    let bytes = bytes.as_ref();
+
     debug_assert!(max_len <= INT_MAX_LEN);
 
     if bytes.len() > max_len {
@@ -38,7 +44,9 @@ pub fn check_int(bytes: &[u8], max_len: usize) -> Result<(), ScriptError> {
     }
 }
 
-pub fn decode_int_unchecked(bytes: &[u8]) -> i64 {
+pub fn decode_int_unchecked<T: AsRef<[u8]>>(bytes: T) -> i64 {
+    let bytes = bytes.as_ref();
+
     debug_assert!(bytes.len() <= INT_MAX_LEN);
 
     if bytes.is_empty() {
@@ -69,24 +77,25 @@ pub fn decode_int_unchecked(bytes: &[u8]) -> i64 {
     }
 }
 
-pub fn decode_int(bytes: &[u8], max_len: usize) -> Result<i64, ScriptError> {
+pub fn decode_int<T: AsRef<[u8]>>(bytes: T, max_len: usize) -> Result<i64, ScriptError> {
+    let bytes = bytes.as_ref();
+
     check_int(bytes, max_len)?;
 
     Ok(decode_int_unchecked(bytes))
 }
 
-pub const FALSE: &[u8; 0] = &[];
-pub const TRUE: &[u8; 1] = &[1];
-
-pub fn encode_bool(b: bool) -> &'static [u8] {
-    if b {
-        TRUE
-    } else {
-        FALSE
-    }
+pub fn encode_bool_expr(b: bool) -> Expr {
+    Expr::bytes_owned(if b { Box::new([1]) } else { Box::new([]) })
 }
 
-pub fn decode_bool(bytes: &[u8]) -> bool {
+pub fn encode_bool_slice(b: bool) -> &'static [u8] {
+    &[1][..b as usize]
+}
+
+pub fn decode_bool<T: AsRef<[u8]>>(bytes: T) -> bool {
+    let bytes = bytes.as_ref();
+
     let mut i = 0;
     while i < bytes.len() {
         if bytes[i] != 0 {
@@ -100,7 +109,8 @@ pub fn decode_bool(bytes: &[u8]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{decode_bool, decode_int, encode_bool, encode_int};
+    use super::{decode_bool, decode_int, encode_bool_expr, encode_int_box};
+    use crate::expr::Expr;
 
     type TestCase<'a> = (i64, &'a [u8], bool);
     const TEST_CASES: &[TestCase] = &[
@@ -123,7 +133,7 @@ mod tests {
     #[test]
     fn test_int_encode() {
         for case in TEST_CASES {
-            assert_eq!(*encode_int(case.0), *case.1);
+            assert_eq!(*encode_int_box(case.0), *case.1);
             assert_eq!(case.0, decode_int(case.1, 4).unwrap());
         }
 
@@ -136,8 +146,8 @@ mod tests {
 
     #[test]
     fn test_bool_encode() {
-        assert_eq!(encode_bool(false), &[]);
-        assert_eq!(encode_bool(true), &[1]);
+        assert_eq!(encode_bool_expr(false), Expr::bytes(&[]));
+        assert_eq!(encode_bool_expr(true), Expr::bytes(&[1]));
 
         for case in TEST_CASES {
             assert_eq!(case.2, decode_bool(case.1));

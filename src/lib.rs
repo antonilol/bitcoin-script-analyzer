@@ -15,5 +15,5 @@ pub mod util;
 pub use crate::{
     analyzer::analyze_script,
     context::{ScriptContext, ScriptRules, ScriptVersion},
-    script::parse_script,
+    script::{convert as script_convert, parse_script},
 };
