@@ -6,7 +6,7 @@ use crate::{
     script::{
         convert::{decode_bool, decode_int, encode_bool_expr, encode_int_expr},
         stack::Stack,
-        ScriptElem, ScriptSlice,
+        Script, ScriptElem,
     },
     script_error::ScriptError,
     util::locktime::{
@@ -14,7 +14,7 @@ use crate::{
         SEQUENCE_LOCKTIME_TYPE_FLAG,
     },
 };
-use core::fmt;
+use core::fmt::{self, Write};
 
 struct LocktimeRequirement {
     exprs: Vec<Expr>,
@@ -49,21 +49,23 @@ impl LocktimeRequirement {
             None => "unknown",
         };
 
+        let tmp;
         Some(format!(
             "type: {}, minValue: {}{}",
             type_,
             min_value,
             if !self.exprs.is_empty() {
-                format!(
-                    ", stack elements: {:?}",
+                tmp = format!(
+                    ", stack elements: {}",
                     self.exprs
                         .iter()
                         .map(|s| s.to_string())
                         .collect::<Vec<_>>()
-                        .join("\n")
-                )
+                        .join(", ")
+                );
+                &tmp
             } else {
-                "".to_string()
+                ""
             }
         ))
     }
@@ -78,16 +80,14 @@ struct AnalyzerResult {
 
 impl fmt::Display for AnalyzerResult {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let tmp;
+        let stack_size = self.stack_size;
+
+        let mut tmp;
         let stack_items_str = if !self.spending_conditions.is_empty() {
-            tmp = format!(
-                "\n{}",
-                self.spending_conditions
-                    .iter()
-                    .map(|s| s.to_string())
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            );
+            tmp = String::new();
+            for s in &self.spending_conditions {
+                write!(tmp, "\n{s}").unwrap();
+            }
             &tmp
         } else {
             " none"
@@ -108,12 +108,11 @@ impl fmt::Display for AnalyzerResult {
 
         write!(
             f,
-            "Stack size: {}\n\
+            "Stack size: {stack_size}\n\
             Stack item requirements:\
             {stack_items_str}\n\
             Locktime requirement: {locktime_str}\n\
-            Sequence requirement: {sequence_str}",
-            self.stack_size,
+            Sequence requirement: {sequence_str}"
         )
     }
 }
@@ -133,7 +132,7 @@ type ThreadPool<'a, 'f> = &'f crate::threadpool::ThreadPool<'a>;
 type ThreadPool<'a, 'f> = ();
 
 pub fn analyze_script(
-    script: ScriptSlice<'_>,
+    script: &Script<'_>,
     ctx: ScriptContext,
     worker_threads: usize,
 ) -> Result<String, String> {
@@ -143,7 +142,7 @@ pub fn analyze_script(
         "Feature \"threads\" disabled, set `worker_threads` to 0 or enable the feature"
     );
 
-    for op in script {
+    for &op in &**script {
         if let ScriptElem::Op(op) = op {
             if op.is_disabled() {
                 return Err(format!(
@@ -178,7 +177,7 @@ pub fn analyze_script(
     };
 
     // TODO does not run on multiple threads yet
-    let results: Vec<_> = results
+    let mut results = results
         .into_iter()
         .filter_map(|mut a| {
             a.calculate_locktime_requirements()
@@ -190,20 +189,17 @@ pub fn analyze_script(
                     spending_conditions: a.spending_conditions,
                 })
         })
-        .collect();
+        .peekable();
 
-    if results.is_empty() {
+    if results.peek().is_none() {
         return Err("Script is unspendable".to_string());
     }
 
-    Ok(format!(
-        "Spending paths:\n\n{}",
-        results
-            .into_iter()
-            .map(|res| res.to_string())
-            .collect::<Vec<_>>()
-            .join("\n\n")
-    ))
+    let mut s = String::from("Spending paths:");
+    for res in results {
+        write!(s, "\n\n{res}").unwrap();
+    }
+    Ok(s)
 }
 
 #[derive(Clone)]
@@ -211,13 +207,13 @@ pub struct ScriptAnalyzer<'a> {
     stack: Stack,
     altstack: Vec<Expr>,
     spending_conditions: Vec<Expr>,
-    script: ScriptSlice<'a>,
+    script: &'a Script<'a>,
     script_offset: usize,
     cs: ConditionStack,
 }
 
 impl<'a> ScriptAnalyzer<'a> {
-    fn from_script(script: ScriptSlice<'a>) -> Self {
+    fn from_script(script: &'a Script<'a>) -> Self {
         Self {
             stack: Stack::new(),
             altstack: Vec::new(),

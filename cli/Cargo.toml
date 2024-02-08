@@ -4,8 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bitcoin-script-analyzer = { path = ".." }
-hex = "0.4.3"
-
-[profile.release]
-lto = true
+bitcoin-script-analyzer = { path = "../lib" }

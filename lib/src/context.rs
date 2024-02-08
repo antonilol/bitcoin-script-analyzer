@@ -1,17 +1,17 @@
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ScriptVersion {
     Legacy,
     SegwitV0,
     SegwitV1,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ScriptRules {
     ConsensusOnly,
     All,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ScriptContext {
     pub version: ScriptVersion,
     pub rules: ScriptRules,

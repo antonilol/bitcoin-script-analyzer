@@ -9,7 +9,7 @@
 
 use core::fmt;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 #[allow(dead_code)]
 pub enum ScriptError {
@@ -207,3 +207,5 @@ impl fmt::Display for ScriptError {
         write!(f, "{}", self.description())
     }
 }
+
+impl std::error::Error for ScriptError {}

@@ -1,6 +1,6 @@
 use core::fmt;
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct Opcode {
     pub opcode: u8,
@@ -13,9 +13,7 @@ impl fmt::Display for Opcode {
 }
 
 macro_rules! opcodes {
-    (
-        $($k:ident:$v:literal,)*
-    ) => {
+    ($($k:ident: $v:literal),* $(,)?) => {
         pub mod opcodes {
             use super::Opcode;
 

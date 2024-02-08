@@ -31,8 +31,9 @@ pub fn check_pub_key<T: AsRef<[u8]>>(pub_key: T) -> PubKeyCheckResult {
     }
 }
 
-// The following function was copied from the Bitcoin Core source code, src/script/interpreter (lines 97-170) at b92d609fb25637ccda000e182da854d4b762eee9
-// Edited for use in this software
+// The following function was copied from the Bitcoin Core source code,
+// src/script/interpreter (lines 97-170) at commit b92d609fb25637ccda000e182da854d4b762eee9
+// Modified for use in this software
 
 // Orignal Bitcoin Core copyright header:
 // Copyright (c) 2009-2010 Satoshi Nakamoto

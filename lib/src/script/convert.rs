@@ -1,35 +1,40 @@
 use crate::{expr::Expr, script_error::ScriptError};
 
-const INT_MAX_LEN: usize = 5;
+pub const INT_MAX_LEN: usize = 5;
 
 pub fn encode_int_expr(n: i64) -> Expr {
     Expr::bytes_owned(encode_int_box(n))
 }
 
 pub fn encode_int_box(n: i64) -> Box<[u8]> {
+    encode_int(n, &mut [0; INT_MAX_LEN])
+        .to_vec()
+        .into_boxed_slice()
+}
+
+pub fn encode_int(n: i64, buf: &mut [u8; INT_MAX_LEN]) -> &[u8] {
     if n == 0 {
-        return Box::new([]);
+        return &buf[..0];
     }
 
-    let mut bytes = [0u8; INT_MAX_LEN];
     let mut len = 0;
 
     let neg = n < 0;
     let mut abs = n.abs();
     while abs != 0 {
-        bytes[len] = abs as u8;
+        buf[len] = abs as u8;
         len += 1;
         abs >>= 8;
     }
 
-    if (bytes[len - 1] & 0x80) != 0 {
-        bytes[len] = if neg { 0x80 } else { 0x00 };
+    if (buf[len - 1] & 0x80) != 0 {
+        buf[len] = if neg { 0x80 } else { 0x00 };
         len += 1;
     } else if neg {
-        bytes[len - 1] |= 0x80;
+        buf[len - 1] |= 0x80;
     }
 
-    bytes[0..len].to_vec().into_boxed_slice()
+    &buf[0..len]
 }
 
 pub fn check_int<T: AsRef<[u8]>>(bytes: T, max_len: usize) -> Result<(), ScriptError> {
@@ -138,10 +143,10 @@ mod tests {
         }
 
         // special case: -0
-        assert_eq!(decode_int(&[0x80], 4).unwrap(), 0);
-        assert_eq!(decode_int(&[0x00, 0x80], 4).unwrap(), 0);
-        assert_eq!(decode_int(&[0x00, 0x00, 0x80], 4).unwrap(), 0);
-        assert_eq!(decode_int(&[0x00, 0x00, 0x00, 0x80], 4).unwrap(), 0);
+        assert_eq!(decode_int([0x80], 4).unwrap(), 0);
+        assert_eq!(decode_int([0x00, 0x80], 4).unwrap(), 0);
+        assert_eq!(decode_int([0x00, 0x00, 0x80], 4).unwrap(), 0);
+        assert_eq!(decode_int([0x00, 0x00, 0x00, 0x80], 4).unwrap(), 0);
     }
 
     #[test]
@@ -154,9 +159,9 @@ mod tests {
         }
 
         // special case: -0 is falsy
-        assert!(!decode_bool(&[0x80]));
-        assert!(!decode_bool(&[0x00, 0x80]));
-        assert!(!decode_bool(&[0x00, 0x00, 0x80]));
-        assert!(!decode_bool(&[0x00, 0x00, 0x00, 0x80]));
+        assert!(!decode_bool([0x80]));
+        assert!(!decode_bool([0x00, 0x80]));
+        assert!(!decode_bool([0x00, 0x00, 0x80]));
+        assert!(!decode_bool([0x00, 0x00, 0x00, 0x80]));
     }
 }

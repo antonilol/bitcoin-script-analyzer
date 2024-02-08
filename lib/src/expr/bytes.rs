@@ -1,4 +1,8 @@
-use core::{fmt, ops::Deref, ops::Index, slice::SliceIndex};
+use core::{
+    fmt,
+    ops::{Deref, Index},
+    slice::SliceIndex,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BytesExprBox(Box<[u8]>);
@@ -43,6 +47,10 @@ pub struct BytesExpr([u8]);
 impl BytesExpr {
     pub fn new(bytes: &[u8]) -> &Self {
         unsafe { &*(bytes as *const [u8] as *const BytesExpr) }
+    }
+
+    pub fn new_mut(bytes: &mut [u8]) -> &mut Self {
+        unsafe { &mut *(bytes as *mut [u8] as *mut BytesExpr) }
     }
 
     pub fn len(&self) -> usize {
