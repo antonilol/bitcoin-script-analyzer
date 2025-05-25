@@ -3,24 +3,22 @@ mod op;
 mod opcode;
 mod stack;
 
-pub use self::{
-    bytes::BytesExprBox,
-    op::{MultisigArgs, OpExpr, OpExprArgs},
-    opcode::{Opcode1, Opcode2, Opcode3},
-    stack::StackExpr,
+pub use self::bytes::BytesExprBox;
+pub use self::op::{MultisigArgs, OpExpr, OpExprArgs};
+pub use self::opcode::{Opcode1, Opcode2, Opcode3};
+pub use self::stack::StackExpr;
+use crate::context::{ScriptContext, ScriptRules, ScriptVersion};
+use crate::script::convert::{
+    check_int, decode_bool, decode_int_unchecked, encode_bool_expr, encode_int_expr,
 };
-use crate::{
-    context::{ScriptContext, ScriptRules, ScriptVersion},
-    script::convert::{
-        check_int, decode_bool, decode_int_unchecked, encode_bool_expr, encode_int_expr,
-    },
-    script_error::ScriptError,
-    util::checksig::{
-        check_pub_key, is_valid_signature_encoding, PubKeyCheckResult, SIG_HASH_TYPES,
-    },
+use crate::script_error::ScriptError;
+use crate::util::checksig::{
+    PubKeyCheckResult, SIG_HASH_TYPES, check_pub_key, is_valid_signature_encoding,
 };
 use bitcoin_hashes::{ripemd160, sha1, sha256};
-use core::{cmp::Ordering, fmt, mem::replace};
+use core::cmp::Ordering;
+use core::fmt;
+use core::mem::replace;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Expr {
@@ -42,7 +40,7 @@ impl Expr {
         Self::Bytes(BytesExprBox::new(bytes))
     }
 
-    pub fn priority(&self) -> impl Ord {
+    pub fn priority(&self) -> impl Ord + use<> {
         match self {
             Expr::Bytes(_) => 0u8,
             Expr::Stack(_) => 1,
@@ -81,7 +79,7 @@ impl Expr {
 
     fn eval_(&mut self, ctx: ScriptContext, depth: usize) -> Result<bool, ScriptError> {
         let mut changed = false;
-        if let Expr::Op(ref mut op) = self {
+        if let Expr::Op(op) = self {
             for arg in op.args_mut() {
                 changed |= arg.eval_(ctx, depth + 1)?;
             }
@@ -304,7 +302,7 @@ impl Expr {
         if search == self {
             *self = replace.clone();
             true
-        } else if let Expr::Op(ref mut op) = self {
+        } else if let Expr::Op(op) = self {
             let mut changed = false;
             for arg in op.args_mut() {
                 changed |= arg.replace_all(search, replace);

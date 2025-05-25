@@ -1,4 +1,5 @@
-use core::{fmt, hint::unreachable_unchecked};
+use core::fmt;
+use core::hint::unreachable_unchecked;
 
 pub mod checksig;
 pub mod locktime;
@@ -7,7 +8,7 @@ unsafe fn encode_hex_digit(n: u8) -> u8 {
     match n {
         0x0..=0x9 => n + b'0',
         0xa..=0xf => n - 0xa + b'a',
-        _ => unreachable_unchecked(),
+        _ => unsafe { unreachable_unchecked() },
     }
 }
 
@@ -150,7 +151,7 @@ impl std::error::Error for HexDecodeError {}
 
 #[cfg(test)]
 mod tests {
-    use super::{decode_hex_in_place, decode_hex_in_place_ignore_whitespace, HexDecodeError};
+    use super::{HexDecodeError, decode_hex_in_place, decode_hex_in_place_ignore_whitespace};
 
     #[test]
     fn test_hex_decode() {

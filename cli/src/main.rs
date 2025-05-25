@@ -1,6 +1,6 @@
+use bitcoin_script_analyzer::util::decode_hex_in_place;
 use bitcoin_script_analyzer::{
-    analyze_script, util::decode_hex_in_place, OwnedScript, ScriptContext, ScriptRules,
-    ScriptVersion,
+    OwnedScript, ScriptContext, ScriptRules, ScriptVersion, analyze_script,
 };
 
 fn unwrap_both<T>(res: Result<T, T>) -> T {

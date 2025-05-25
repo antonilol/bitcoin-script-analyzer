@@ -1,7 +1,6 @@
+use bitcoin_script_analyzer::util::{decode_hex_in_place_ignore_whitespace, encode_hex_easy};
 use bitcoin_script_analyzer::{
-    analyze_script,
-    util::{decode_hex_in_place_ignore_whitespace, encode_hex_easy},
-    OwnedScript, ScriptContext, ScriptRules, ScriptVersion,
+    OwnedScript, ScriptContext, ScriptRules, ScriptVersion, analyze_script,
 };
 use std::{cell::RefCell, rc::Rc};
 use wasm_bindgen::prelude::*;

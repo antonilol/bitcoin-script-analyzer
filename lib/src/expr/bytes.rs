@@ -1,8 +1,6 @@
-use core::{
-    fmt,
-    ops::{Deref, Index},
-    slice::SliceIndex,
-};
+use core::fmt;
+use core::ops::{Deref, Index};
+use core::slice::SliceIndex;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BytesExprBox(Box<[u8]>);

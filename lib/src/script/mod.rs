@@ -1,17 +1,13 @@
 pub mod convert;
 pub mod stack;
 
-use self::convert::{encode_int, INT_MAX_LEN};
-use crate::{
-    opcode::{opcodes, Opcode},
-    util::{decode_hex_in_place, HexDecodeError},
-};
-use core::{
-    fmt,
-    num::IntErrorKind,
-    ops::{Deref, DerefMut},
-    str,
-};
+use self::convert::{INT_MAX_LEN, encode_int};
+use crate::opcode::{Opcode, opcodes};
+use crate::util::{HexDecodeError, decode_hex_in_place};
+use core::fmt;
+use core::num::IntErrorKind;
+use core::ops::{Deref, DerefMut};
+use core::str;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ScriptElem<'a> {

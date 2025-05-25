@@ -1,4 +1,5 @@
-use time::{format_description, OffsetDateTime};
+use time::OffsetDateTime;
+use time::format_description;
 
 pub const SEQUENCE_LOCKTIME_TYPE_FLAG: u32 = 1 << 22;
 pub const SEQUENCE_LOCKTIME_MASK: u32 = 0x0000ffff;
@@ -37,8 +38,7 @@ pub fn absolute_timelock_height_to_string(n: u32) -> String {
 }
 
 pub fn absolute_timelock_time_to_string(n: u32) -> String {
-    const DATE_FORMAT_STR: &str =
-        "on [year]-[month]-[day] [hour]:[minute]:[second] ([unix_timestamp] seconds since unix epoch)";
+    const DATE_FORMAT_STR: &str = "on [year]-[month]-[day] [hour]:[minute]:[second] ([unix_timestamp] seconds since unix epoch)";
 
     let date = OffsetDateTime::from_unix_timestamp(n as i64).unwrap();
     let format = format_description::parse_borrowed::<2>(DATE_FORMAT_STR).unwrap();

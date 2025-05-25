@@ -79,8 +79,8 @@ impl ConditionStack {
             // The top is the first false value; toggling it will make everything true.
             self.m_first_false_pos = Self::NO_FALSE;
         } // else {
-          // There is a false value, but not on top. No action is needed as toggling
-          // anything but the first false value is unobservable.
-          // }
+        // There is a false value, but not on top. No action is needed as toggling
+        // anything but the first false value is unobservable.
+        // }
     }
 }

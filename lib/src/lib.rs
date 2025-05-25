@@ -9,11 +9,12 @@ mod expr;
 mod opcode;
 mod script;
 pub mod script_error;
+#[cfg(feature = "threads")]
 mod threadpool;
 pub mod util;
 
-pub use crate::{
-    analyzer::analyze_script,
-    context::{ScriptContext, ScriptRules, ScriptVersion},
-    script::{convert as script_convert, OwnedScript, ParseScriptError, Script, ScriptElem},
+pub use crate::analyzer::analyze_script;
+pub use crate::context::{ScriptContext, ScriptRules, ScriptVersion};
+pub use crate::script::{
+    OwnedScript, ParseScriptError, Script, ScriptElem, convert as script_convert,
 };

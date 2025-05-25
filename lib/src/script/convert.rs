@@ -1,4 +1,5 @@
-use crate::{expr::Expr, script_error::ScriptError};
+use crate::expr::Expr;
+use crate::script_error::ScriptError;
 
 pub const INT_MAX_LEN: usize = 5;
 
@@ -75,11 +76,7 @@ pub fn decode_int_unchecked<T: AsRef<[u8]>>(bytes: T) -> i64 {
         i += 1;
     }
 
-    if neg {
-        -(n as i64)
-    } else {
-        n as i64
-    }
+    if neg { -(n as i64) } else { n as i64 }
 }
 
 pub fn decode_int<T: AsRef<[u8]>>(bytes: T, max_len: usize) -> Result<i64, ScriptError> {

@@ -1,9 +1,8 @@
 use super::{Expr, Opcode1, Opcode2, Opcode3};
-use crate::{
-    opcode::{opcodes, Opcode},
-    script_error::ScriptError,
-};
-use core::{cmp::Ordering, fmt};
+use crate::opcode::{Opcode, opcodes};
+use crate::script_error::ScriptError;
+use core::cmp::Ordering;
+use core::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OpExpr {

@@ -1,19 +1,12 @@
-#[cfg(feature = "threads")]
-use std::{
-    sync::{
-        mpsc::{channel, Sender},
-        Arc, Mutex,
-    },
-    thread::Scope,
-};
+use std::sync::mpsc::{Sender, channel};
+use std::sync::{Arc, Mutex};
+use std::thread::Scope;
 
-#[cfg(feature = "threads")]
 #[derive(Clone)]
 pub struct ThreadPool<'a> {
     sender: Sender<Box<dyn FnOnce() + Send + 'a>>,
 }
 
-#[cfg(feature = "threads")]
 impl<'a> ThreadPool<'a> {
     pub fn new(scope: &'a Scope<'a, '_>, worker_threads: usize) -> Self {
         let (sender, receiver) = channel::<Box<dyn FnOnce() + Send + 'a>>();

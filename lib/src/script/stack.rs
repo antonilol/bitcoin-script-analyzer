@@ -1,5 +1,6 @@
 use crate::expr::Expr;
-use core::{array, cmp::max};
+use core::array;
+use core::cmp::max;
 
 #[derive(Clone)]
 pub struct Stack {

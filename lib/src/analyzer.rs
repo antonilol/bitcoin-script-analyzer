@@ -1,20 +1,16 @@
-use crate::{
-    condition_stack::ConditionStack,
-    context::{ScriptContext, ScriptRules, ScriptVersion},
-    expr::{Expr, MultisigArgs, OpExprArgs, Opcode1, Opcode2, Opcode3},
-    opcode::opcodes,
-    script::{
-        convert::{decode_bool, decode_int, encode_bool_expr, encode_int_expr},
-        stack::Stack,
-        Script, ScriptElem,
-    },
-    script_error::ScriptError,
-    util::locktime::{
-        locktime_to_string, locktime_type_equals, LocktimeType, SEQUENCE_LOCKTIME_MASK,
-        SEQUENCE_LOCKTIME_TYPE_FLAG,
-    },
+use crate::condition_stack::ConditionStack;
+use crate::context::{ScriptContext, ScriptRules, ScriptVersion};
+use crate::expr::{Expr, MultisigArgs, OpExprArgs, Opcode1, Opcode2, Opcode3};
+use crate::opcode::opcodes;
+use crate::script::convert::{decode_bool, decode_int, encode_bool_expr, encode_int_expr};
+use crate::script::{Script, ScriptElem, stack::Stack};
+use crate::script_error::ScriptError;
+use crate::util::locktime::{
+    LocktimeType, SEQUENCE_LOCKTIME_MASK, SEQUENCE_LOCKTIME_TYPE_FLAG, locktime_to_string,
+    locktime_type_equals,
 };
-use core::fmt::{self, Write};
+use core::fmt;
+use core::fmt::Write;
 
 struct LocktimeRequirement {
     exprs: Vec<Expr>,
