@@ -15,14 +15,14 @@ pub enum ScriptElem<'a> {
     Bytes(&'a [u8]),
 }
 
-impl<'a> fmt::Display for ScriptElem<'a> {
+impl fmt::Display for ScriptElem<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Self::Op(opcode) => write!(f, "{opcode}"),
             Self::Bytes(bytes) => {
                 write!(f, "<")?;
                 for &byte in bytes {
-                    write!(f, "{:02x}", byte)?;
+                    write!(f, "{byte:02x}")?;
                 }
                 write!(f, ">")
             }
@@ -175,13 +175,13 @@ impl<'a> Deref for OwnedScript<'a> {
     }
 }
 
-impl<'a> DerefMut for OwnedScript<'a> {
+impl DerefMut for OwnedScript<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         Script::new_mut(&mut self.0)
     }
 }
 
-impl<'a> fmt::Display for OwnedScript<'a> {
+impl fmt::Display for OwnedScript<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         <Script<'_> as fmt::Display>::fmt(self, f)
     }
@@ -274,13 +274,13 @@ impl<'a> Deref for Script<'a> {
     }
 }
 
-impl<'a> DerefMut for Script<'a> {
+impl DerefMut for Script<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl<'a> fmt::Display for Script<'a> {
+impl fmt::Display for Script<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.fmt_newline_separated_indented(f)
     }
