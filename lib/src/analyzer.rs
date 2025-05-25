@@ -235,7 +235,7 @@ impl<'a> ScriptAnalyzer<'a> {
             let expr = &self.spending_conditions[i];
             if let Expr::Op(expr) = expr {
                 if let OpExprArgs::Args1(op, arg) = &expr.args {
-                    let arg = &arg[0];
+                    let [arg] = &**arg;
 
                     if matches!(
                         op,

@@ -19,7 +19,7 @@ use crate::{
         check_pub_key, is_valid_signature_encoding, PubKeyCheckResult, SIG_HASH_TYPES,
     },
 };
-use bitcoin_hashes::{ripemd160, sha1, sha256, Hash};
+use bitcoin_hashes::{ripemd160, sha1, sha256};
 use core::{cmp::Ordering, fmt, mem::replace};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -35,16 +35,16 @@ impl Expr {
     }
 
     pub fn bytes(bytes: &[u8]) -> Self {
-        Self::Bytes(BytesExprBox::new(bytes.to_vec().into_boxed_slice()))
+        Self::Bytes(BytesExprBox::new(bytes.into()))
     }
 
     pub fn bytes_owned(bytes: Box<[u8]>) -> Self {
         Self::Bytes(BytesExprBox::new(bytes))
     }
 
-    pub fn priority(&self) -> u8 {
+    pub fn priority(&self) -> impl Ord {
         match self {
-            Expr::Bytes(_) => 0,
+            Expr::Bytes(_) => 0u8,
             Expr::Stack(_) => 1,
             Expr::Op(_) => 2,
         }
