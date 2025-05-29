@@ -15,7 +15,7 @@ use core::fmt::Write;
 
 use alloc::boxed::Box;
 use alloc::format;
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use alloc::vec::Vec;
 
 struct LocktimeRequirement {
@@ -51,25 +51,18 @@ impl LocktimeRequirement {
             None => "unknown",
         };
 
-        let tmp;
-        Some(format!(
-            "type: {}, minValue: {}{}",
-            type_,
-            min_value,
-            if !self.exprs.is_empty() {
-                tmp = format!(
-                    ", stack elements: {}",
-                    self.exprs
-                        .iter()
-                        .map(|s| s.to_string())
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                );
-                &tmp
-            } else {
-                ""
+        let mut ret = format!("type: {type_}, minValue: {min_value}");
+
+        let mut exprs = self.exprs.iter();
+        if let Some(expr) = exprs.next() {
+            let _ = write!(ret, ", stack elements: {expr}");
+
+            for expr in exprs {
+                let _ = write!(ret, ", {expr}");
             }
-        ))
+        }
+
+        Some(ret)
     }
 }
 
@@ -194,7 +187,7 @@ pub fn analyze_script(
         .peekable();
 
     if results.peek().is_none() {
-        return Err("Script is unspendable".to_string());
+        return Err(String::from("Script is unspendable"));
     }
 
     let mut s = String::from("Spending paths:");

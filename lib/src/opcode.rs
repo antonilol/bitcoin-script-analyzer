@@ -1,7 +1,5 @@
 use core::fmt;
 
-use alloc::string::ToString;
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct Opcode {
@@ -26,9 +24,22 @@ macro_rules! opcodes {
         }
 
         impl Opcode {
-            pub fn from_name_exact(name: &str) -> Option<Self> {
+            const LONGEST_NAME_LENGTH: usize = {
+                let mut max = 0;
+
                 $(
-                    if name == stringify!($k) {
+                    let len = stringify!($k).len();
+                    if max < len {
+                        max = len;
+                    }
+                )*
+
+                max
+            };
+
+            pub fn from_name_exact_unprefixed(name_bytes: &[u8]) -> Option<Self> {
+                $(
+                    if name_bytes == &stringify!($k).as_bytes()[3..] {
                         let op = Opcode { opcode: $v };
 
                         if !op.is_internal() {
@@ -307,13 +318,27 @@ impl Opcode {
     }
 
     pub fn from_name(name: &str) -> Option<Self> {
-        // TODO replace with more efficient implementation of to_uppercase
-        let name_upper = name.to_uppercase();
-        if let Some(opcode) = Self::from_name_exact(&name_upper) {
-            return Some(opcode);
+        const ASCII_UPPERCASE_MASK: u8 = !(1 << 5);
+
+        let mut name = name.as_bytes();
+
+        match name.split_first_chunk() {
+            Some((&[a, b, c], tail))
+                if a & ASCII_UPPERCASE_MASK == b'O'
+                    && b & ASCII_UPPERCASE_MASK == b'P'
+                    && c == b'_' =>
+            {
+                name = tail;
+            }
+            _ => {}
         }
 
-        Self::from_name_exact(&("OP_".to_string() + &name_upper))
+        let mut buf = [0; Self::LONGEST_NAME_LENGTH - 3];
+        let buf = buf.get_mut(..name.len())?;
+        buf.copy_from_slice(name);
+        buf.make_ascii_uppercase();
+
+        Self::from_name_exact_unprefixed(buf)
     }
 }
 
@@ -359,6 +384,43 @@ impl Opcode {
             OpcodeType::Locktime
         } else {
             OpcodeType::Invalid
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_opcode_from_name() {
+        use super::opcodes::*;
+
+        let cases = &[
+            ("", None),
+            ("0", Some(OP_0)),
+            ("1", Some(OP_1)),
+            ("OP_0", Some(OP_0)),
+            ("Op_0", Some(OP_0)),
+            ("oP_0", Some(OP_0)),
+            ("op_0", Some(OP_0)),
+            (str::from_utf8(&[b'_'; 100]).unwrap(), None),
+            ("false", Some(OP_0)),
+            ("False", Some(OP_0)),
+            ("FaLsE", Some(OP_0)),
+            ("trUE", Some(OP_1)),
+            ("OP_trUE", Some(OP_1)),
+            ("3DUP", Some(OP_3DUP)),
+            ("3Dup", Some(OP_3DUP)),
+            ("fromaltstack", Some(OP_FROMALTSTACK)),
+            ("csv", Some(OP_CHECKSEQUENCEVERIFY)),
+            ("cltv", Some(OP_CHECKLOCKTIMEVERIFY)),
+            ("OP_INTERNAL_NOT", None),
+            ("OP_CHECKMULTISIGVERIFY", Some(OP_CHECKMULTISIGVERIFY)),
+        ];
+
+        for &(name, expected_opcode) in cases {
+            assert_eq!(Opcode::from_name(name), expected_opcode, "name = {name}");
         }
     }
 }
