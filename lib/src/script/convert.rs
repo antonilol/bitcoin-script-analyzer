@@ -1,6 +1,8 @@
 use crate::expr::Expr;
 use crate::script_error::ScriptError;
 
+use alloc::boxed::Box;
+
 pub const INT_MAX_LEN: usize = 5;
 
 pub fn encode_int_expr(n: i64) -> Expr {

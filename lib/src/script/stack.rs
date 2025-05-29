@@ -1,6 +1,10 @@
 use crate::expr::Expr;
+
 use core::array;
 use core::cmp::max;
+
+use alloc::boxed::Box;
+use alloc::vec::Vec;
 
 #[derive(Clone)]
 pub struct Stack {

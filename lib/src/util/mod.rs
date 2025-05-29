@@ -1,8 +1,11 @@
+pub mod checksig;
+pub mod locktime;
+
 use core::fmt;
 use core::hint::unreachable_unchecked;
 
-pub mod checksig;
-pub mod locktime;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 unsafe fn encode_hex_digit(n: u8) -> u8 {
     match n {
@@ -147,11 +150,13 @@ impl fmt::Display for HexDecodeError {
     }
 }
 
-impl std::error::Error for HexDecodeError {}
+impl core::error::Error for HexDecodeError {}
 
 #[cfg(test)]
 mod tests {
     use super::{HexDecodeError, decode_hex_in_place, decode_hex_in_place_ignore_whitespace};
+
+    use alloc::string::String;
 
     #[test]
     fn test_hex_decode() {

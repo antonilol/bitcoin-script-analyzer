@@ -1,6 +1,8 @@
 use super::{Expr, OpExpr, OpExprArgs};
 use crate::script_error::ScriptError;
 
+use alloc::boxed::Box;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 pub enum Opcode1 {

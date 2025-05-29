@@ -1,5 +1,7 @@
+use alloc::format;
+use alloc::string::String;
+
 use time::OffsetDateTime;
-use time::format_description;
 
 pub const SEQUENCE_LOCKTIME_TYPE_FLAG: u32 = 1 << 22;
 pub const SEQUENCE_LOCKTIME_MASK: u32 = 0x0000ffff;
@@ -37,13 +39,17 @@ pub fn absolute_timelock_height_to_string(n: u32) -> String {
     format!("at block {n}")
 }
 
-pub fn absolute_timelock_time_to_string(n: u32) -> String {
-    const DATE_FORMAT_STR: &str = "on [year]-[month]-[day] [hour]:[minute]:[second] ([unix_timestamp] seconds since unix epoch)";
+pub fn absolute_timelock_time_to_string(unix_timestamp: u32) -> String {
+    let datetime = OffsetDateTime::from_unix_timestamp(unix_timestamp as i64).unwrap();
 
-    let date = OffsetDateTime::from_unix_timestamp(n as i64).unwrap();
-    let format = format_description::parse_borrowed::<2>(DATE_FORMAT_STR).unwrap();
+    let (year, month, day) = datetime.to_calendar_date();
+    let month = month as u8;
 
-    date.format(&format).unwrap()
+    let (hour, minute, second) = datetime.to_hms();
+
+    format!(
+        "on {year:04}-{month:02}-{day:02} {hour:02}:{minute:02}:{second:02} ({unix_timestamp} seconds since unix epoch)"
+    )
 }
 
 pub fn relative_timelock_height_to_string(n: u32) -> String {

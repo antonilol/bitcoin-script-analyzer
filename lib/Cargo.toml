@@ -14,4 +14,4 @@ threads = []
 
 [dependencies]
 bitcoin_hashes = { version = "0.16.0", default-features = false }
-time = { version = "0.3.41", features = ["formatting"] }
+time = { version = "0.3.41", default-features = false }

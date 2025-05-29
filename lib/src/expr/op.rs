@@ -1,8 +1,12 @@
 use super::{Expr, Opcode1, Opcode2, Opcode3};
 use crate::opcode::{Opcode, opcodes};
 use crate::script_error::ScriptError;
+
 use core::cmp::Ordering;
 use core::fmt;
+
+use alloc::boxed::Box;
+use alloc::vec::Vec;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OpExpr {

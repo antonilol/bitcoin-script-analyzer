@@ -2,6 +2,8 @@ use core::fmt;
 use core::ops::{Deref, Index};
 use core::slice::SliceIndex;
 
+use alloc::boxed::Box;
+
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BytesExprBox(Box<[u8]>);
 

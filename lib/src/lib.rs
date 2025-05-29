@@ -1,6 +1,6 @@
-// maybe later
-// #![cfg_attr(not(feature = "threads"), no_std)]
-// extern crate alloc;
+#![cfg_attr(not(feature = "threads"), no_std)]
+
+extern crate alloc;
 
 mod analyzer;
 pub mod condition_stack;

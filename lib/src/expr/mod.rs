@@ -15,10 +15,14 @@ use crate::script_error::ScriptError;
 use crate::util::checksig::{
     PubKeyCheckResult, SIG_HASH_TYPES, check_pub_key, is_valid_signature_encoding,
 };
-use bitcoin_hashes::{ripemd160, sha1, sha256};
+
 use core::cmp::Ordering;
 use core::fmt;
 use core::mem::replace;
+
+use alloc::boxed::Box;
+
+use bitcoin_hashes::{ripemd160, sha1, sha256};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Expr {

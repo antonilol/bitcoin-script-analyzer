@@ -9,8 +9,14 @@ use crate::util::locktime::{
     LocktimeType, SEQUENCE_LOCKTIME_MASK, SEQUENCE_LOCKTIME_TYPE_FLAG, locktime_to_string,
     locktime_type_equals,
 };
+
 use core::fmt;
 use core::fmt::Write;
+
+use alloc::boxed::Box;
+use alloc::format;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 struct LocktimeRequirement {
     exprs: Vec<Expr>,

@@ -4,10 +4,13 @@ pub mod stack;
 use self::convert::{INT_MAX_LEN, encode_int};
 use crate::opcode::{Opcode, opcodes};
 use crate::util::{HexDecodeError, decode_hex_in_place};
+
 use core::fmt;
 use core::num::IntErrorKind;
 use core::ops::{Deref, DerefMut};
 use core::str;
+
+use alloc::vec::Vec;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ScriptElem<'a> {
@@ -309,7 +312,7 @@ impl fmt::Display for ParseScriptError {
     }
 }
 
-impl std::error::Error for ParseScriptError {}
+impl core::error::Error for ParseScriptError {}
 
 #[derive(Debug, Clone)]
 pub enum ParseAsmScriptError {
@@ -340,8 +343,8 @@ impl fmt::Display for ParseAsmScriptError {
     }
 }
 
-impl std::error::Error for ParseAsmScriptError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+impl core::error::Error for ParseAsmScriptError {
+    fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
         Some(match self {
             Self::HexDecodeError(err) => err,
             _ => return None,

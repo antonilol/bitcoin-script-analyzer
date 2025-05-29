@@ -1,5 +1,7 @@
 use core::fmt;
 
+use alloc::string::ToString;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct Opcode {

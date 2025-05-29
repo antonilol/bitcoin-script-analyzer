@@ -208,4 +208,4 @@ impl fmt::Display for ScriptError {
     }
 }
 
-impl std::error::Error for ScriptError {}
+impl core::error::Error for ScriptError {}
