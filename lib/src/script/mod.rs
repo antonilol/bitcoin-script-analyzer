@@ -144,9 +144,7 @@ impl<'a> OwnedScript<'a> {
                             }
                         }
                         ret.extend(decode_hex_in_place(hex)?);
-                    } else if let Some(opcode) =
-                        Opcode::from_name(str::from_utf8(op).expect("TODO"))
-                    {
+                    } else if let Some(opcode) = Opcode::from_name(op) {
                         if opcode.pushdata_length().is_some() {
                             return Err(ParseAsmScriptError::ExplicitPushdata);
                         }

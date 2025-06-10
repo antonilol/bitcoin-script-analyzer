@@ -1,7 +1,13 @@
-use bitcoin_script_analyzer::util::decode_hex_in_place;
+mod cli;
+
+use self::cli::Args;
+
+use bitcoin_script_analyzer::util::{decode_hex_in_place, encode_hex_easy};
 use bitcoin_script_analyzer::{
     OwnedScript, ScriptContext, ScriptRules, ScriptVersion, analyze_script,
 };
+use clap::Parser;
+use cli::InputType;
 
 fn unwrap_both<T>(res: Result<T, T>) -> T {
     match res {
@@ -10,20 +16,24 @@ fn unwrap_both<T>(res: Result<T, T>) -> T {
 }
 
 pub fn main() {
-    let script_hex = std::env::args()
-        .nth(1)
-        .expect("missing argument \"script\"");
+    let args = Args::parse();
 
-    println!("hex: {script_hex}");
-    let mut script_hex = script_hex.into_bytes();
-    let script_bytes = decode_hex_in_place(&mut script_hex).unwrap();
-    let script = OwnedScript::parse_from_bytes(script_bytes).unwrap();
-    println!("script:\n{script}");
-    println!();
+    let mut script = args.input.into_bytes();
+    let (bytes, script) = match args.input_type {
+        InputType::Hex => {
+            let bytes = decode_hex_in_place(&mut script).unwrap();
+            (bytes, OwnedScript::parse_from_bytes(bytes).unwrap())
+        }
+        InputType::Asm => OwnedScript::parse_from_asm_in_place(&mut script).unwrap(),
+    };
+
+    println!("hex: {}\nscript:\n{script}\n", encode_hex_easy(bytes));
+
     let res = analyze_script(
         &script,
         ScriptContext::new(ScriptVersion::SegwitV0, ScriptRules::All),
         0,
     );
+
     println!("{}", unwrap_both(res));
 }

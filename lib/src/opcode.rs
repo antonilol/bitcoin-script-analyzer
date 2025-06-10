@@ -317,10 +317,8 @@ impl Opcode {
         )
     }
 
-    pub fn from_name(name: &str) -> Option<Self> {
+    pub fn from_name(mut name: &[u8]) -> Option<Self> {
         const ASCII_UPPERCASE_MASK: u8 = !(1 << 5);
-
-        let mut name = name.as_bytes();
 
         match name.split_first_chunk() {
             Some((&[a, b, c], tail))
@@ -392,35 +390,43 @@ impl Opcode {
 mod tests {
     use super::*;
 
+    use alloc::string::String;
+
     #[test]
     fn test_opcode_from_name() {
         use super::opcodes::*;
 
         let cases = &[
-            ("", None),
-            ("0", Some(OP_0)),
-            ("1", Some(OP_1)),
-            ("OP_0", Some(OP_0)),
-            ("Op_0", Some(OP_0)),
-            ("oP_0", Some(OP_0)),
-            ("op_0", Some(OP_0)),
-            (str::from_utf8(&[b'_'; 100]).unwrap(), None),
-            ("false", Some(OP_0)),
-            ("False", Some(OP_0)),
-            ("FaLsE", Some(OP_0)),
-            ("trUE", Some(OP_1)),
-            ("OP_trUE", Some(OP_1)),
-            ("3DUP", Some(OP_3DUP)),
-            ("3Dup", Some(OP_3DUP)),
-            ("fromaltstack", Some(OP_FROMALTSTACK)),
-            ("csv", Some(OP_CHECKSEQUENCEVERIFY)),
-            ("cltv", Some(OP_CHECKLOCKTIMEVERIFY)),
-            ("OP_INTERNAL_NOT", None),
-            ("OP_CHECKMULTISIGVERIFY", Some(OP_CHECKMULTISIGVERIFY)),
+            (b"" as &[_], None),
+            (b"0", Some(OP_0)),
+            (b"1", Some(OP_1)),
+            (b"OP_0", Some(OP_0)),
+            (b"Op_0", Some(OP_0)),
+            (b"oP_0", Some(OP_0)),
+            (b"op_0", Some(OP_0)),
+            (&[b'_'; 100], None),
+            (b"false", Some(OP_0)),
+            (b"False", Some(OP_0)),
+            (b"FaLsE", Some(OP_0)),
+            (b"trUE", Some(OP_1)),
+            (b"OP_trUE", Some(OP_1)),
+            (b"3DUP", Some(OP_3DUP)),
+            (b"3Dup", Some(OP_3DUP)),
+            (b"fromaltstack", Some(OP_FROMALTSTACK)),
+            (b"csv", Some(OP_CHECKSEQUENCEVERIFY)),
+            (b"cltv", Some(OP_CHECKLOCKTIMEVERIFY)),
+            (b"OP_INTERNAL_NOT", None),
+            (b"OP_CHECKMULTISIGVERIFY", Some(OP_CHECKMULTISIGVERIFY)),
+            (b"invalid utf8 \xff", None),
         ];
 
         for &(name, expected_opcode) in cases {
-            assert_eq!(Opcode::from_name(name), expected_opcode, "name = {name}");
+            assert_eq!(
+                Opcode::from_name(name),
+                expected_opcode,
+                "name = {}",
+                String::from_utf8_lossy(name),
+            );
         }
     }
 }
